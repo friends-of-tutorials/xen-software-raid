@@ -454,7 +454,7 @@ pvcreate /dev/md3
 xe sr-create type=lvm content-type=user device-config:device=/dev/md3 name-label="Local Storage 1"
 ```
 
-### 1.33 Maybe create lvm II
+### 1.33 Maybe create LVM II
 
 ```bash
 pvcreate /dev/md6
