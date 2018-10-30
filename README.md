@@ -4,7 +4,9 @@ How to install a software raid on XenServer 7.6.2
 
 ## 1. Instruction
 
+### 1.1 Installation XenServer
 
+First install the XenServer as usual without the LVM repositories. 
 
 ## A. Authors
 
