@@ -270,7 +270,7 @@ sdb       8:16   0 931,5G  0 disk
 │ └─md0   9:0    0    18G  0 raid1 
 ├─sdb2    8:18   0    18G  0 part  
 │ └─md1   9:1    0    18G  0 raid1 
-├─sdb3    8:19   0   512M  0 part  
+├─sdb3    8:19   0   512M  0 part  # <- /dev/md2 is missing
 ├─sdb5    8:21   0     4G  0 part  
 │ └─md4   9:4    0     4G  0 raid1 
 └─sdb6    8:22   0     1G  0 part  
@@ -279,7 +279,7 @@ sr0      11:0    1  1024M  0 rom
 loop0     7:0    0    44M  1 loop  /var/xen/xc-install
 ```
 
-If so then:
+If so then set fd00, create a new raid and check the uuid in /etc/mdadm.conf
 
 ```bash
 sgdisk --typecode=3:fd00 /dev/sdb
@@ -312,26 +312,46 @@ mdadm -a /dev/md4 /dev/sda5
 mdadm -a /dev/md5 /dev/sda6
 ```
 
-### 1.23 Install grub on /dev/sda
+### 1.24 Install grub on /dev/sda
 
 ```bash
 grub-install /dev/sda
 ```
 
-# create lvm partitions
+### 1.25 Create LVM partitions on /dev/sda and /dev/sdb
+
+```bash
 gdisk /dev/sda
 n -> 4 -> ENTER -> ENTER -> FD00 -> w
 gdisk /dev/sdb
 n -> 4 -> ENTER -> ENTER -> FD00 -> w
+```
 
-# create lvm raid 1
+### 1.26 Create LVM RAID I
+
+```bash
 yes|mdadm --create /dev/md3 --level=1 --raid-devices=2 /dev/sda4 /dev/sdb4
- 
-# create lvm raid 2
-yes|mdadm --create /dev/md6 --level=1 --raid-devices=2 /dev/sdc1 /dev/sdd1
+```
 
-# check
-user$ lsblk 
+### 1.27 Maybe create LVM partitions on /dev/sdc and /dev/sdd
+
+```bash
+gdisk /dev/sdc
+n -> 4 -> ENTER -> ENTER -> FD00 -> w
+gdisk /dev/sdd
+n -> 4 -> ENTER -> ENTER -> FD00 -> w
+```
+ 
+### 1.28 Maybe create LVM RAID II
+
+```bash
+yes|mdadm --create /dev/md6 --level=1 --raid-devices=2 /dev/sdc1 /dev/sdd1
+```
+
+### 1.29 Check partitions
+
+```bash
+root$ lsblk 
 NAME    MAJ:MIN RM   SIZE RO TYPE  MOUNTPOINT
 sda       8:0    0 931,5G  0 disk  
 ├─sda1    8:1    0    18G  0 part  
@@ -367,8 +387,12 @@ sdd       8:48   0 931,5G  0 disk
   └─md6   9:6    0 931,4G  0 raid1 
 sr0      11:0    1  1024M  0 rom   
 loop0     7:0    0    44M  1 loop  /var/xen/xc-install
+```
 
-user$ cat /proc/mdstat
+### 1.30 Check syncing RAID
+
+```bash
+root$ cat /proc/mdstat
 Personalities : [raid1] 
 md6 : active raid1 sdd1[1] sdc1[0]
       976630464 blocks super 1.2 [2/2] [UU]
@@ -396,14 +420,21 @@ md2 : active raid1 sdb3[0] sda3[2]
       523712 blocks super 1.2 [2/2] [UU]
       
 unused devices: <none>
+```
 
-# create lvm 1
+### 1.31 Create LVM I
+
+```bash
 pvcreate /dev/md3
 xe sr-create type=lvm content-type=user device-config:device=/dev/md3 name-label="Local Storage 1"
+```
 
-# create lvm 2
+### 1.32 Maybe create lvm II
+
+```bash
 pvcreate /dev/md6
 xe sr-create type=lvm content-type=user device-config:device=/dev/md6 name-label="Local Storage 2"
+```
 
 ## A. Authors
 
