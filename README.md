@@ -312,13 +312,46 @@ mdadm -a /dev/md4 /dev/sda5
 mdadm -a /dev/md5 /dev/sda6
 ```
 
-### 1.24 Install grub on /dev/sda
+### 1.24 Check syncing RAID
+
+```bash
+root$ cat /proc/mdstat
+Personalities : [raid1] 
+md6 : active raid1 sdd1[1] sdc1[0]
+      976630464 blocks super 1.2 [2/2] [UU]
+      [>....................]  resync =  1.3% (13116544/976630464) finish=146.0min speed=109984K/sec
+      bitmap: 8/8 pages [32KB], 65536KB chunk
+
+md3 : active raid1 sdb4[1] sda4[0]
+      933114560 blocks super 1.2 [2/2] [UU]
+      [=>...................]  resync =  7.2% (67247616/933114560) finish=136.2min speed=105941K/sec
+      bitmap: 7/7 pages [28KB], 65536KB chunk
+
+md1 : active raid1 sda2[2] sdb2[0]
+      18857984 blocks super 1.2 [2/2] [UU]
+      
+md4 : active raid1 sdb5[0] sda5[2]
+      4190208 blocks super 1.2 [2/2] [UU]
+      
+md5 : active raid1 sda6[2] sdb6[0]
+      1047552 blocks super 1.2 [2/2] [UU]
+      
+md0 : active raid1 sdb1[0] sda1[2]
+      18857984 blocks super 1.2 [2/2] [UU]
+      
+md2 : active raid1 sdb3[0] sda3[2]
+      523712 blocks super 1.2 [2/2] [UU]
+      
+unused devices: <none>
+```
+
+### 1.25 Install grub on /dev/sda
 
 ```bash
 grub-install /dev/sda
 ```
 
-### 1.25 Create LVM partitions on /dev/sda and /dev/sdb
+### 1.26 Create LVM partitions on /dev/sda and /dev/sdb
 
 ```bash
 gdisk /dev/sda
@@ -327,13 +360,13 @@ gdisk /dev/sdb
 n -> 4 -> ENTER -> ENTER -> FD00 -> w
 ```
 
-### 1.26 Create LVM RAID I
+### 1.27 Create LVM RAID I
 
 ```bash
 yes|mdadm --create /dev/md3 --level=1 --raid-devices=2 /dev/sda4 /dev/sdb4
 ```
 
-### 1.27 Maybe create LVM partitions on /dev/sdc and /dev/sdd
+### 1.28 Maybe create LVM partitions on /dev/sdc and /dev/sdd
 
 ```bash
 gdisk /dev/sdc
@@ -342,13 +375,13 @@ gdisk /dev/sdd
 n -> 4 -> ENTER -> ENTER -> FD00 -> w
 ```
  
-### 1.28 Maybe create LVM RAID II
+### 1.29 Maybe create LVM RAID II
 
 ```bash
 yes|mdadm --create /dev/md6 --level=1 --raid-devices=2 /dev/sdc1 /dev/sdd1
 ```
 
-### 1.29 Check partitions
+### 1.30 Check partitions
 
 ```bash
 root$ lsblk 
@@ -389,7 +422,7 @@ sr0      11:0    1  1024M  0 rom
 loop0     7:0    0    44M  1 loop  /var/xen/xc-install
 ```
 
-### 1.30 Check syncing RAID
+### 1.31 Check syncing RAID
 
 ```bash
 root$ cat /proc/mdstat
@@ -422,14 +455,14 @@ md2 : active raid1 sdb3[0] sda3[2]
 unused devices: <none>
 ```
 
-### 1.31 Create LVM I
+### 1.32 Create LVM I
 
 ```bash
 pvcreate /dev/md3
 xe sr-create type=lvm content-type=user device-config:device=/dev/md3 name-label="Local Storage 1"
 ```
 
-### 1.32 Maybe create lvm II
+### 1.33 Maybe create lvm II
 
 ```bash
 pvcreate /dev/md6
