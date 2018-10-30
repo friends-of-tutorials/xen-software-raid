@@ -46,7 +46,7 @@ sgdisk --mbrtogpt --clear /dev/sdb
 sgdisk -R /dev/sdb /dev/sda
 ```
  
-### 1.6 set partition type
+### 1.6 Set partition types
 
 ```bash
 sgdisk --typecode=1:fd00 /dev/sdb
@@ -191,73 +191,132 @@ root$ cat /mnt/etc/fstab
 /opt/xensource/packages/iso/XenCenter.iso   /var/xen/xc-install   iso9660   loop,ro   0  0
 ```
  
-# set label from sda to md0
-e2label /dev/sda1 |xargs -t e2label /dev/md0
+### 1.12 Set label from sda to md0
 
-# chroot the raid to make some changes
+```bash
+e2label /dev/sda1 |xargs -t e2label /dev/md0
+```
+
+### 1.13 Chroot the RAID to make some changes on it
+
+```bash
 mount --bind /dev /mnt/dev
 mount --bind /sys /mnt/sys
 mount --bind /proc /mnt/proc
 #mount --bind /run /mnt/run
 chroot /mnt /bin/bash
- 
-# backup the initrd img
+```
+
+### 1.14 Backup the initrd img
+
+```bash
 cp /boot/initrd-$(uname -r).img /boot/initrd-$(uname -r).img.bak
+```
 
-# build new initrd img
+### 1.15 Build new initrd img
+
+```bash
 dracut --mdadmconf --fstab --add="mdraid" --add-drivers="raid1" --force /boot/initrd-$(uname -r).img $(uname -r) -M
+```
 
-# set grub configs
+### 1.16 Set grub configs
+
+```bash
 sed -i 's/quiet/rd.auto rd.auto=1 rhgb quiet/' /boot/grub/grub.cfg
 sed -i 's/LABEL=root-[a-zA-Z\-]*/\/dev\/md0/' /boot/grub/grub.cfg
 sed -i '/search/ i\  insmod gzio part_msdos diskfilter mdraid1x' /boot/grub/grub.cfg
 sed -i '/search/ c\  set root=(md/0)' /boot/grub/grub.cfg
+```
 
-#sed -i 's/LABEL=root-[a-zA-Z\-]*/\/dev\/md0/' /boot/grub/grub.cfg
-#sed -i '/search/ i\   insmod gzio' /boot/grub/grub.cfg
-#sed -i '/search/ i\   insmod part_msdos' /boot/grub/grub.cfg
-#sed -i '/search/ i\   insmod diskfilter mdraid09' /boot/grub/grub.cfg
-#sed -i '/search/ c\   set root=(hd0,gpt1)' /boot/grub/grub.cfg
+### 1.17 Install grub loader on /dev/sdb
 
-
-# install grub loader
-grub-install /dev/sda # Not sure if this works, since there is no raid on sda yet, so grub-install might not add the mdraid1x driver
+```bash
 grub-install /dev/sdb
+```
 
-# close chroot
+### 1.18 Close chroot
+
+```bash
 exit
+```
 
-# copy initrd img
+### 1.19 Backup and copy the created initrd img and grub config
+
+```bash
 cp /boot/initrd-$(uname -r).img /boot/initrd-$(uname -r).img.bak
 cp /mnt/boot/initrd-$(uname -r).img /boot/
 cp /mnt/boot/grub/grub.cfg /boot/grub/grub.cfg
+```
 
-# reboot the system
+### 1.20 Reboot the system (make sure to start with /dev/sdb!)
+
+```bash
 reboot
+```
 
+### 1.21 Check if /dev/md2 is missing
 
-# maybe if /dev/md2 is missing
+```bash
+root$ lsblk 
+NAME    MAJ:MIN RM   SIZE RO TYPE  MOUNTPOINT
+sda       8:0    0 931,5G  0 disk  
+├─sda1    8:1    0    18G  0 part  /
+├─sda2    8:2    0    18G  0 part  
+├─sda3    8:3    0   512M  0 part  
+├─sda5    8:5    0     4G  0 part  /var/log
+└─sda6    8:6    0     1G  0 part  [SWAP]
+sdb       8:16   0 931,5G  0 disk  
+├─sdb1    8:17   0    18G  0 part  
+│ └─md0   9:0    0    18G  0 raid1 
+├─sdb2    8:18   0    18G  0 part  
+│ └─md1   9:1    0    18G  0 raid1 
+├─sdb3    8:19   0   512M  0 part  
+├─sdb5    8:21   0     4G  0 part  
+│ └─md4   9:4    0     4G  0 raid1 
+└─sdb6    8:22   0     1G  0 part  
+  └─md5   9:5    0  1023M  0 raid1 
+sr0      11:0    1  1024M  0 rom   
+loop0     7:0    0    44M  1 loop  /var/xen/xc-install
+```
+
+If so then:
+
+```bash
 sgdisk --typecode=3:fd00 /dev/sdb
 yes|mdadm --create /dev/md2 --level=1 --raid-devices=2 /dev/sdb3 missing
 mdadm --detail --scan # vs.
 cat /etc/mdadm.conf
 vi /etc/mdadm.conf # change uuid if has changed
+```
 
+### 1.22 Delete partition informations on /dev/sda
+
+```bash
 sgdisk --zap-all /dev/sda
 sgdisk --mbrtogpt --clear /dev/sda
+```
 
-# copy the partition table from sdb to sda
+### 1.23 Copy the partition table from sdb to sda
+
+```bash
 sgdisk -R /dev/sda /dev/sdb
+```
 
-# complete raid
+### 1.23 Complete raid
+
+```bash
 mdadm -a /dev/md0 /dev/sda1
 mdadm -a /dev/md1 /dev/sda2
 mdadm -a /dev/md2 /dev/sda3
 mdadm -a /dev/md4 /dev/sda5
 mdadm -a /dev/md5 /dev/sda6
+```
 
-# To be super save install grub on sda again, since it discovers the raid and adds the required drivers.
+### 1.23 Install grub on /dev/sda
+
+```bash
 grub-install /dev/sda
+```
 
 # create lvm partitions
 gdisk /dev/sda
