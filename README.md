@@ -1,6 +1,6 @@
-# xen software raid (mdadm)
+# XenServer Software RAID installation (mdadm)
 
-How to install a software raid on xen 7.6.2
+How to install a software raid on XenServer 7.6.2
 
 ## 1. Instruction
 
