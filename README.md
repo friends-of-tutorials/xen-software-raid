@@ -26,7 +26,7 @@ sr0     11:0    1  1024M  0 rom
 loop0    7:0    0    44M  1 loop /var/xen/xc-install
 ```
 
-### 1.3 load kernel module
+### 1.3 Load kernel module
 
 ```bash
 modprobe md_mod
