@@ -317,21 +317,13 @@ mdadm -a /dev/md5 /dev/sda6
 ```bash
 root$ cat /proc/mdstat
 Personalities : [raid1] 
-md6 : active raid1 sdd1[1] sdc1[0]
-      976630464 blocks super 1.2 [2/2] [UU]
-      [>....................]  resync =  1.3% (13116544/976630464) finish=146.0min speed=109984K/sec
-      bitmap: 8/8 pages [32KB], 65536KB chunk
-
-md3 : active raid1 sdb4[1] sda4[0]
-      933114560 blocks super 1.2 [2/2] [UU]
-      [=>...................]  resync =  7.2% (67247616/933114560) finish=136.2min speed=105941K/sec
-      bitmap: 7/7 pages [28KB], 65536KB chunk
-
 md1 : active raid1 sda2[2] sdb2[0]
       18857984 blocks super 1.2 [2/2] [UU]
       
 md4 : active raid1 sdb5[0] sda5[2]
-      4190208 blocks super 1.2 [2/2] [UU]
+      933114560 blocks super 1.2 [2/2] [UU]
+      [=>...................]  resync =  7.2% (67247616/933114560) finish=136.2min speed=105941K/sec
+      bitmap: 7/7 pages [28KB], 65536KB chunk
       
 md5 : active raid1 sda6[2] sdb6[0]
       1047552 blocks super 1.2 [2/2] [UU]
