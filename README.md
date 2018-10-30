@@ -11,7 +11,7 @@ First install the XenServer as usual without the LVM repositories.
 ### 1.2 Check environment after XenServer installation
 
 ```bash
-uesr$ lsblk 
+root$ lsblk 
 NAME   MAJ:MIN RM   SIZE RO TYPE MOUNTPOINT
 sda      8:0    0 931,5G  0 disk 
 ├─sda1   8:1    0    18G  0 part /
@@ -66,7 +66,7 @@ yes|mdadm --create /dev/md4 --level=1 --raid-devices=2 /dev/sdb5 missing
 yes|mdadm --create /dev/md5 --level=1 --raid-devices=2 /dev/sdb6 missing
 ```
 
-### 1.6.1 Check RAID
+#### 1.6.1 Check RAID
 
  ```bash
 root$ cat /proc/mdstat 
@@ -97,7 +97,7 @@ mkfs.ext3 /dev/md4
 mkswap /dev/md5
 ```
 
-### 1.7.1 Check the filesystem
+#### 1.7.1 Check the filesystem
 
 ```bash
 root$ lsblk 
@@ -123,24 +123,35 @@ sr0      11:0    1  1024M  0 rom
 loop0     7:0    0    44M  1 loop  /var/xen/xc-install
 ```
 
-# mount the directories
+### 1.8 Mount the directories of /dev/sdb for preparation
+
+```bash
 mount /dev/md0 /mnt
 mkdir -p /mnt/var/log
 mount /dev/md4 /mnt/var/log
+```
 
-# copy/clone data to raid devices
+### 1.9 Clone data to raid devices from /dev/sda to /dev/sdb
+
+```bash
 cp -xa / /mnt
 cp -xa /var/log /mnt/var
+```
 
-# create mdadm config
+### 1.10 create mdadm config
+
+```bash
 echo "MAILADDR root" > /mnt/etc/mdadm.conf
 echo "auto +imsm +1.x -all" >> /mnt/etc/mdadm.conf
 echo "DEVICE /dev/sd*[a-z][1-9]" >> /mnt/etc/mdadm.conf
 mdadm --detail --scan >> /mnt/etc/mdadm.conf
 cp /mnt/etc/mdadm.conf /etc
+```
 
-# check
-user$ cat /etc/mdadm.conf
+#### 1.10.1 Check the mdadm config
+
+```bash
+root$ cat /etc/mdadm.conf
 MAILADDR root
 auto +imsm +1.x -all
 DEVICE /dev/sd*[a-z][1-9]
@@ -149,26 +160,36 @@ ARRAY /dev/md1 metadata=1.2 name=xenserver-7:1 UUID=7b4bae54:236b1e2f:7f1a7a0e:e
 ARRAY /dev/md2 metadata=1.2 name=xenserver-7:2 UUID=0c082894:f0f24c6b:43bf4045:0970c253
 ARRAY /dev/md4 metadata=1.2 name=xenserver-7:4 UUID=4a064db1:0c8e8f42:76810417:5cf0ecbd
 ARRAY /dev/md5 metadata=1.2 name=xenserver-7:5 UUID=30dfc30a:1c8031bf:93d8c760:24186100
+```
 
-# check
-user$ cat /mnt/etc/fstab
+#### 1.10.1 Check the fstab config
+
+```bash
+root$ cat /mnt/etc/fstab
 LABEL=root-ocmtfp    /         ext3     defaults   1  1
 LABEL=swap-ocmtfp          swap      swap   defaults   0  0
 LABEL=logs-ocmtfp    /var/log         ext3     defaults   0  2
 /opt/xensource/packages/iso/XenCenter.iso   /var/xen/xc-install   iso9660   loop,ro   0  0
+```
 
-# set new fstab with md devices
+### 1.11 Set new fstab with md devices
+
+```bash
 sed -i 's/LABEL=root-[a-zA-Z\-]*/\/dev\/md0/' /mnt/etc/fstab
 sed -i 's/LABEL=swap-[a-zA-Z\-]*/\/dev\/md5/' /mnt/etc/fstab
 sed -i 's/LABEL=logs-[a-zA-Z\-]*/\/dev\/md4/' /mnt/etc/fstab
 cp /mnt/etc/fstab /etc
+```
 
-# check
-user$ cat /mnt/etc/fstab
+#### 1.11.1 Check the fstab config after adjustment
+
+```bash
+root$ cat /mnt/etc/fstab
 /dev/md0    /         ext3     defaults   1  1
 /dev/md5          swap      swap   defaults   0  0
 /dev/md4    /var/log         ext3     defaults   0  2
 /opt/xensource/packages/iso/XenCenter.iso   /var/xen/xc-install   iso9660   loop,ro   0  0
+```
  
 # set label from sda to md0
 e2label /dev/sda1 |xargs -t e2label /dev/md0
