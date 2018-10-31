@@ -344,13 +344,100 @@ gdisk /dev/sdb
 n -> 4 -> ENTER -> ENTER -> FD00 -> w
 ```
 
-#### 1.2.26 Create LVM RAID I
+#### 1.2.26 Create LVM RAID
 
 ```bash
 yes|mdadm --create /dev/md3 --level=1 --raid-devices=2 /dev/sda4 /dev/sdb4
 ```
 
-#### 1.2.27 Maybe create LVM partitions on /dev/sdc and /dev/sdd
+#### 1.2.27 Check partitions
+
+```bash
+root$ lsblk 
+NAME    MAJ:MIN RM   SIZE RO TYPE  MOUNTPOINT
+sda       8:0    0 931,5G  0 disk  
+├─sda1    8:1    0    18G  0 part  
+│ └─md0   9:0    0    18G  0 raid1 /
+├─sda2    8:2    0    18G  0 part  
+│ └─md1   9:1    0    18G  0 raid1 
+├─sda3    8:3    0   512M  0 part  
+│ └─md2   9:2    0 511,4M  0 raid1 
+├─sda4    8:4    0   890G  0 part  
+│ └─md3   9:3    0 889,9G  0 raid1 
+├─sda5    8:5    0     4G  0 part  
+│ └─md4   9:4    0     4G  0 raid1 /var/log
+└─sda6    8:6    0     1G  0 part  
+  └─md5   9:5    0  1023M  0 raid1 [SWAP]
+sdb       8:16   0 931,5G  0 disk  
+├─sdb1    8:17   0    18G  0 part  
+│ └─md0   9:0    0    18G  0 raid1 /
+├─sdb2    8:18   0    18G  0 part  
+│ └─md1   9:1    0    18G  0 raid1 
+├─sdb3    8:19   0   512M  0 part  
+│ └─md2   9:2    0 511,4M  0 raid1 
+├─sdb4    8:20   0   890G  0 part  
+│ └─md3   9:3    0 889,9G  0 raid1 
+├─sdb5    8:21   0     4G  0 part  
+│ └─md4   9:4    0     4G  0 raid1 /var/log
+└─sdb6    8:22   0     1G  0 part  
+  └─md5   9:5    0  1023M  0 raid1 [SWAP]
+sr0      11:0    1  1024M  0 rom   
+loop0     7:0    0    44M  1 loop  /var/xen/xc-install
+```
+
+#### 1.2.28 Check syncing RAID
+
+```bash
+root$ cat /proc/mdstat
+Personalities : [raid1] 
+md3 : active raid1 sdb4[1] sda4[0]
+      933114560 blocks super 1.2 [2/2] [UU]
+      [=>...................]  resync =  7.2% (67247616/933114560) finish=136.2min speed=105941K/sec
+      bitmap: 7/7 pages [28KB], 65536KB chunk
+
+md1 : active raid1 sda2[2] sdb2[0]
+      18857984 blocks super 1.2 [2/2] [UU]
+      
+md4 : active raid1 sdb5[0] sda5[2]
+      4190208 blocks super 1.2 [2/2] [UU]
+      
+md5 : active raid1 sda6[2] sdb6[0]
+      1047552 blocks super 1.2 [2/2] [UU]
+      
+md0 : active raid1 sdb1[0] sda1[2]
+      18857984 blocks super 1.2 [2/2] [UU]
+      
+md2 : active raid1 sdb3[0] sda3[2]
+      523712 blocks super 1.2 [2/2] [UU]
+      
+unused devices: <none>
+```
+
+#### 1.2.29 Make metadata readable and the lvmetad.socket is available
+
+```bash
+vi /etc/lvm/lvm.conf
+```
+
+Set `metadata_read_only` to 0 and `use_lvmetad` also to 0:
+
+```bash
+metadata_read_only = 0
+
+use_lvmetad = 0
+```
+
+#### 1.2.30 Create LVM
+
+```bash
+root$ pvcreate /dev/md3
+  Physical volume "/dev/md6" successfully created
+root$ xe sr-create type=lvm content-type=user device-config:device=/dev/md3 name-label="Local Storage 1"
+```
+
+### 1.3 Create other LVM Repositories
+
+#### 1.3.1 Create LVM partitions on /dev/sdc and /dev/sdd
 
 ```bash
 gdisk /dev/sdc
@@ -359,13 +446,13 @@ gdisk /dev/sdd
 n -> 4 -> ENTER -> ENTER -> FD00 -> w
 ```
  
-#### 1.2.28 Maybe create LVM RAID II
+#### 1.3.2 Maybe create LVM RAID
 
 ```bash
 yes|mdadm --create /dev/md6 --level=1 --raid-devices=2 /dev/sdc1 /dev/sdd1
 ```
 
-#### 1.2.29 Check partitions
+#### 1.3.3 Check partitions
 
 ```bash
 root$ lsblk 
@@ -406,62 +493,7 @@ sr0      11:0    1  1024M  0 rom
 loop0     7:0    0    44M  1 loop  /var/xen/xc-install
 ```
 
-#### 1.2.30 Check syncing RAID
-
-```bash
-root$ cat /proc/mdstat
-Personalities : [raid1] 
-md6 : active raid1 sdd1[1] sdc1[0]
-      976630464 blocks super 1.2 [2/2] [UU]
-      [>....................]  resync =  1.3% (13116544/976630464) finish=146.0min speed=109984K/sec
-      bitmap: 8/8 pages [32KB], 65536KB chunk
-
-md3 : active raid1 sdb4[1] sda4[0]
-      933114560 blocks super 1.2 [2/2] [UU]
-      [=>...................]  resync =  7.2% (67247616/933114560) finish=136.2min speed=105941K/sec
-      bitmap: 7/7 pages [28KB], 65536KB chunk
-
-md1 : active raid1 sda2[2] sdb2[0]
-      18857984 blocks super 1.2 [2/2] [UU]
-      
-md4 : active raid1 sdb5[0] sda5[2]
-      4190208 blocks super 1.2 [2/2] [UU]
-      
-md5 : active raid1 sda6[2] sdb6[0]
-      1047552 blocks super 1.2 [2/2] [UU]
-      
-md0 : active raid1 sdb1[0] sda1[2]
-      18857984 blocks super 1.2 [2/2] [UU]
-      
-md2 : active raid1 sdb3[0] sda3[2]
-      523712 blocks super 1.2 [2/2] [UU]
-      
-unused devices: <none>
-```
-
-#### 1.2.31 Make metadata readable and the lvmetad.socket is available
-
-```bash
-vi /etc/lvm/lvm.conf
-```
-
-Set `metadata_read_only` to 0 and `use_lvmetad` also to 0:
-
-```bash
-metadata_read_only = 0
-
-use_lvmetad = 0
-```
-
-#### 1.2.32 Create LVM I
-
-```bash
-root$ pvcreate /dev/md3
-  Physical volume "/dev/md6" successfully created
-root$ xe sr-create type=lvm content-type=user device-config:device=/dev/md3 name-label="Local Storage 1"
-```
-
-#### 1.2.33 Maybe create LVM II
+#### 1.3.4 Create LVM
 
 ```bash
 root$ pvcreate /dev/md6
