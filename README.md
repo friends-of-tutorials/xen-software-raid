@@ -517,7 +517,40 @@ root$ xe sr-create type=lvm content-type=user device-config:device=/dev/md6 name
 
 ### 1.4 Setting up email notification
 
-In progress..
+#### 1.4.1 Install a MTA (postfix)
+
+```bash
+root$ vi /etc/yum.repos.d/CentOS-Base.repo
+```
+
+Set `enabled` to 1:
+
+```bash
+[base]
+name=CentOS-$releasever - Base
+mirrorlist=http://mirrorlist.centos.org/?release=$releasever&arch=$basearch&repo=os&infra=$infra
+enabled=1
+```
+
+```bash
+root$ yum install postfix
+```
+
+Edit some postfix configs:
+
+```bash
+root$ vi /etc/postfix/main.cf
+```
+
+```bash
+inet_interfaces = 127.0.0.1, 192.168.18.10
+```
+
+#### 1.4.1 Check the mail command
+
+```bash
+
+```
 
 ### 1.5 Check RAID health status
 
