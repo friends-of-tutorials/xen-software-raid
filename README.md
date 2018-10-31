@@ -42,6 +42,14 @@ sgdisk --zap-all /dev/sdb
 sgdisk --mbrtogpt --clear /dev/sdb
 ```
 
+Make sure that there are no mdadm-superblocks of older installations on the hard disk. Use the following commands to clean up the partitions if necessary:
+
+```bash
+umount /dev/md<number of md>
+mdadm --stop /dev/md<number of md>
+mdadm --zero-superblock /dev/sdb<number of partition>
+```
+
 #### 1.2.4 Copy the partition table from /dev/sda to /dev/sdb
 
 ```bash
