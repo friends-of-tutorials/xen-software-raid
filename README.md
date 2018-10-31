@@ -427,7 +427,7 @@ md2 : active raid1 sdb3[0] sda3[2]
 unused devices: <none>
 ```
 
-#### 1.2.29 Make metadata readable and the lvmetad.socket is available
+#### 1.2.29 Make metadata readable and the lvmetad.socket available
 
 ```bash
 vi /etc/lvm/lvm.conf
@@ -449,7 +449,7 @@ root$ pvcreate /dev/md3
 root$ xe sr-create type=lvm content-type=user device-config:device=/dev/md3 name-label="Local Storage 1"
 ```
 
-### 1.3 Create another LVM Repository and add new disks
+### 1.3 Create another LVM Repository if wanted and add new disks
 
 #### 1.3.1 Create LVM partitions on /dev/sdc and /dev/sdd
 
