@@ -8,7 +8,9 @@ This instruction was written and tested for the XenServer version 7.6.2 and inst
 
 First install the XenServer as usual without the LVM repositories.
 
-### 1.2 Check environment after XenServer installation
+### 1.2 Install mdadm
+
+#### 1.2.1 Check environment after XenServer installation
 
 ```bash
 root$ lsblk 
@@ -26,27 +28,27 @@ sr0     11:0    1  1024M  0 rom
 loop0    7:0    0    44M  1 loop /var/xen/xc-install
 ```
 
-### 1.3 Load kernel module
+#### 1.2.2 Load kernel module
 
 ```bash
 modprobe md_mod
 modprobe raid1
 ```
 
-### 1.4 Delete partition informations on /dev/sdb
+#### 1.2.3 Delete partition informations on /dev/sdb
 
 ```bash
 sgdisk --zap-all /dev/sdb
 sgdisk --mbrtogpt --clear /dev/sdb
 ```
 
-### 1.5 Copy the partition table from /dev/sda to /dev/sdb
+#### 1.2.4 Copy the partition table from /dev/sda to /dev/sdb
 
 ```bash
 sgdisk -R /dev/sdb /dev/sda
 ```
  
-### 1.6 Set partition types
+#### 1.2.5 Set partition types
 
 ```bash
 sgdisk --typecode=1:fd00 /dev/sdb
@@ -56,7 +58,7 @@ sgdisk --typecode=5:fd00 /dev/sdb
 sgdisk --typecode=6:fd00 /dev/sdb
 ```
 
-### 1.6 Create RAID with /dev/sdb
+#### 1.2.6 Create RAID with /dev/sdb
 
 ```bash
 yes|mdadm --create /dev/md0 --level=1 --raid-devices=2 /dev/sdb1 missing
@@ -66,7 +68,7 @@ yes|mdadm --create /dev/md4 --level=1 --raid-devices=2 /dev/sdb5 missing
 yes|mdadm --create /dev/md5 --level=1 --raid-devices=2 /dev/sdb6 missing
 ```
 
-#### 1.6.1 Check RAID
+##### 1.2.6.1 Check RAID
 
  ```bash
 root$ cat /proc/mdstat 
@@ -89,7 +91,7 @@ md0 : active raid1 sdb1[0]
 unused devices: <none>
 ```
  
-### 1.7 Create the filesystem
+#### 1.2.7 Create the filesystem
 
 ```bash
 mkfs.ext3 /dev/md0
@@ -97,7 +99,7 @@ mkfs.ext3 /dev/md4
 mkswap /dev/md5
 ```
 
-#### 1.7.1 Check the filesystem
+##### 1.2.7.1 Check the filesystem
 
 ```bash
 root$ lsblk 
@@ -123,7 +125,7 @@ sr0      11:0    1  1024M  0 rom
 loop0     7:0    0    44M  1 loop  /var/xen/xc-install
 ```
 
-### 1.8 Mount the directories of /dev/sdb for preparation
+#### 1.2.8 Mount the directories of /dev/sdb for preparation
 
 ```bash
 mount /dev/md0 /mnt
@@ -131,14 +133,14 @@ mkdir -p /mnt/var/log
 mount /dev/md4 /mnt/var/log
 ```
 
-### 1.9 Clone data to raid devices from /dev/sda to /dev/sdb
+#### 1.2.9 Clone data to raid devices from /dev/sda to /dev/sdb
 
 ```bash
 cp -xa / /mnt
 cp -xa /var/log /mnt/var
 ```
 
-### 1.10 create mdadm config
+#### 1.2.10 create mdadm config
 
 ```bash
 echo "MAILADDR root" > /mnt/etc/mdadm.conf
@@ -148,7 +150,7 @@ mdadm --detail --scan >> /mnt/etc/mdadm.conf
 cp /mnt/etc/mdadm.conf /etc
 ```
 
-#### 1.10.1 Check the mdadm config
+##### 1.2.10.1 Check the mdadm config
 
 ```bash
 root$ cat /etc/mdadm.conf
@@ -162,7 +164,7 @@ ARRAY /dev/md4 metadata=1.2 name=xenserver-7:4 UUID=4a064db1:0c8e8f42:76810417:5
 ARRAY /dev/md5 metadata=1.2 name=xenserver-7:5 UUID=30dfc30a:1c8031bf:93d8c760:24186100
 ```
 
-#### 1.10.1 Check the fstab config
+##### 1.2.10.2 Check the fstab config
 
 ```bash
 root$ cat /mnt/etc/fstab
@@ -172,7 +174,7 @@ LABEL=logs-ocmtfp    /var/log         ext3     defaults   0  2
 /opt/xensource/packages/iso/XenCenter.iso   /var/xen/xc-install   iso9660   loop,ro   0  0
 ```
 
-### 1.11 Set new fstab with md devices
+#### 1.2.11 Set new fstab with md devices
 
 ```bash
 sed -i 's/LABEL=root-[a-zA-Z\-]*/\/dev\/md0/' /mnt/etc/fstab
@@ -181,7 +183,7 @@ sed -i 's/LABEL=logs-[a-zA-Z\-]*/\/dev\/md4/' /mnt/etc/fstab
 cp /mnt/etc/fstab /etc
 ```
 
-#### 1.11.1 Check the fstab config after adjustment
+##### 1.2.11.1 Check the fstab config after adjustment
 
 ```bash
 root$ cat /mnt/etc/fstab
@@ -191,13 +193,13 @@ root$ cat /mnt/etc/fstab
 /opt/xensource/packages/iso/XenCenter.iso   /var/xen/xc-install   iso9660   loop,ro   0  0
 ```
  
-### 1.12 Set label from sda to md0
+#### 1.2.12 Set label from sda to md0
 
 ```bash
 e2label /dev/sda1 |xargs -t e2label /dev/md0
 ```
 
-### 1.13 Chroot the RAID to make some changes on it
+#### 1.2.13 Chroot the RAID to make some changes on it
 
 ```bash
 mount --bind /dev /mnt/dev
@@ -207,14 +209,14 @@ mount --bind /proc /mnt/proc
 chroot /mnt /bin/bash
 ```
 
-### 1.14 Backup and build new initrd img
+#### 1.2.14 Backup and build new initrd img
 
 ```bash
 cp /boot/initrd-$(uname -r).img /boot/initrd-$(uname -r).img.bak
 dracut --mdadmconf --fstab --add="mdraid" --add-drivers="raid1" --force /boot/initrd-$(uname -r).img $(uname -r) -M
 ```
 
-### 1.15 Set grub configs and install grub loader on /dev/sdb
+#### 1.2.15 Set grub configs and install grub loader on /dev/sdb
 
 ```bash
 sed -i 's/quiet/rd.auto rd.auto=1 rhgb quiet/' /boot/grub/grub.cfg
@@ -224,13 +226,13 @@ sed -i '/search/ c\  set root=(md/0)' /boot/grub/grub.cfg
 grub-install /dev/sdb
 ```
 
-### 1.16 Close chroot
+#### 1.2.16 Close chroot
 
 ```bash
 exit
 ```
 
-### 1.17 Backup and copy the created initrd img and grub config
+#### 1.2.17 Backup and copy the created initrd img and grub config
 
 ```bash
 cp /boot/initrd-$(uname -r).img /boot/initrd-$(uname -r).img.bak
@@ -238,13 +240,13 @@ cp /mnt/boot/initrd-$(uname -r).img /boot/
 cp /mnt/boot/grub/grub.cfg /boot/grub/grub.cfg
 ```
 
-### 1.18 Reboot the system (make sure to start with /dev/sdb!)
+#### 1.2.18 Reboot the system (make sure to start with /dev/sdb!)
 
 ```bash
 reboot
 ```
 
-### 1.19 Check if /dev/md2 is missing
+#### 1.2.19 Check if /dev/md2 is missing
 
 ```bash
 root$ lsblk 
@@ -279,20 +281,20 @@ cat /etc/mdadm.conf
 vi /etc/mdadm.conf # change uuid if has changed
 ```
 
-### 1.20 Delete partition informations on /dev/sda
+#### 1.2.20 Delete partition informations on /dev/sda
 
 ```bash
 sgdisk --zap-all /dev/sda
 sgdisk --mbrtogpt --clear /dev/sda
 ```
 
-### 1.21 Copy the partition table from sdb to sda
+#### 1.2.21 Copy the partition table from sdb to sda
 
 ```bash
 sgdisk -R /dev/sda /dev/sdb
 ```
 
-### 1.22 Complete raid
+#### 1.2.22 Complete raid
 
 ```bash
 mdadm -a /dev/md0 /dev/sda1
@@ -302,7 +304,7 @@ mdadm -a /dev/md4 /dev/sda5
 mdadm -a /dev/md5 /dev/sda6
 ```
 
-### 1.23 Check syncing RAID
+#### 1.2.23 Check syncing RAID
 
 ```bash
 root$ cat /proc/mdstat
@@ -327,13 +329,13 @@ md2 : active raid1 sdb3[0] sda3[2]
 unused devices: <none>
 ```
 
-### 1.24 Install grub on /dev/sda
+#### 1.2.24 Install grub on /dev/sda
 
 ```bash
 grub-install /dev/sda
 ```
 
-### 1.25 Create LVM partitions on /dev/sda and /dev/sdb
+#### 1.2.25 Create LVM partitions on /dev/sda and /dev/sdb
 
 ```bash
 gdisk /dev/sda
@@ -342,13 +344,13 @@ gdisk /dev/sdb
 n -> 4 -> ENTER -> ENTER -> FD00 -> w
 ```
 
-### 1.26 Create LVM RAID I
+#### 1.2.26 Create LVM RAID I
 
 ```bash
 yes|mdadm --create /dev/md3 --level=1 --raid-devices=2 /dev/sda4 /dev/sdb4
 ```
 
-### 1.27 Maybe create LVM partitions on /dev/sdc and /dev/sdd
+#### 1.2.27 Maybe create LVM partitions on /dev/sdc and /dev/sdd
 
 ```bash
 gdisk /dev/sdc
@@ -357,13 +359,13 @@ gdisk /dev/sdd
 n -> 4 -> ENTER -> ENTER -> FD00 -> w
 ```
  
-### 1.28 Maybe create LVM RAID II
+#### 1.2.28 Maybe create LVM RAID II
 
 ```bash
 yes|mdadm --create /dev/md6 --level=1 --raid-devices=2 /dev/sdc1 /dev/sdd1
 ```
 
-### 1.29 Check partitions
+#### 1.2.29 Check partitions
 
 ```bash
 root$ lsblk 
@@ -404,7 +406,7 @@ sr0      11:0    1  1024M  0 rom
 loop0     7:0    0    44M  1 loop  /var/xen/xc-install
 ```
 
-### 1.30 Check syncing RAID
+#### 1.2.30 Check syncing RAID
 
 ```bash
 root$ cat /proc/mdstat
@@ -437,7 +439,7 @@ md2 : active raid1 sdb3[0] sda3[2]
 unused devices: <none>
 ```
 
-### 1.31 Make metadata readable and the lvmetad.socket is available
+#### 1.2.31 Make metadata readable and the lvmetad.socket is available
 
 ```bash
 vi /etc/lvm/lvm.conf
@@ -451,7 +453,7 @@ metadata_read_only = 0
 use_lvmetad = 0
 ```
 
-### 1.32 Create LVM I
+#### 1.2.32 Create LVM I
 
 ```bash
 root$ pvcreate /dev/md3
@@ -459,7 +461,7 @@ root$ pvcreate /dev/md3
 root$ xe sr-create type=lvm content-type=user device-config:device=/dev/md3 name-label="Local Storage 1"
 ```
 
-### 1.33 Maybe create LVM II
+#### 1.2.33 Maybe create LVM II
 
 ```bash
 root$ pvcreate /dev/md6
