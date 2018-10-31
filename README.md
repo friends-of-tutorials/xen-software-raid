@@ -579,9 +579,45 @@ root$ echo "Add some text in here" | mail -s "The subject of this email" <email@
 
 ### 1.5 Check RAID health status manually
 
+```bash
+root$ cat /proc/mdstat
+```
+
+#### 1.5.1 An example of a fully functional RAID
+
+```bash
+Personalities : [raid1] 
+md6 : active raid1 sdd1[1] sdc1[0]
+      976630464 blocks super 1.2 [2/2] [UU]
+      bitmap: 0/8 pages [0KB], 65536KB chunk
+
+md3 : active raid1 sdb4[1] sda4[0]
+      933114560 blocks super 1.2 [2/2] [UU]
+      bitmap: 0/7 pages [0KB], 65536KB chunk
+
+md1 : active raid1 sda2[2] sdb2[0]
+      18857984 blocks super 1.2 [2/2] [UU]
+      
+md4 : active raid1 sdb5[0] sda5[2]
+      4190208 blocks super 1.2 [2/2] [UU]
+      
+md5 : active raid1 sda6[2] sdb6[0]
+      1047552 blocks super 1.2 [2/2] [UU]
+      
+md0 : active raid1 sdb1[0] sda1[2]
+      18857984 blocks super 1.2 [2/2] [UU]
+      
+md2 : active raid1 sdb3[0] sda3[2]
+      523712 blocks super 1.2 [2/2] [UU]
+      
+unused devices: <none>
+```
+
+#### 1.5.2 An example of a defective RAID
+
 In progress..
 
-### 1.6 Change defective hard disk
+### 1.6 Change a defective hard disk
 
 In progress..
 
