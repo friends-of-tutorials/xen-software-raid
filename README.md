@@ -435,7 +435,7 @@ root$ pvcreate /dev/md3
 root$ xe sr-create type=lvm content-type=user device-config:device=/dev/md3 name-label="Local Storage 1"
 ```
 
-### 1.3 Create other LVM Repositories
+### 1.3 Create another LVM Repositories
 
 #### 1.3.1 Create LVM partitions on /dev/sdc and /dev/sdd
 
