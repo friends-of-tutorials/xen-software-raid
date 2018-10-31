@@ -556,6 +556,26 @@ inet_interfaces = 127.0.0.1, 192.168.18.10
 root$ postfix start
 ```
 
+##### 1.4.1.4 sSMTP configuration
+
+```bash
+vi /etc/ssmtp/ssmtp.conf
+```
+
+Set `mailhub` to `localhost`:
+
+```bash
+mailhub=127.0.0.1
+```
+
+```bash
+root$ vi /etc/ssmtp/revaliases
+```
+
+```bash
+root:your@email-sender-address.tld
+```
+
 ##### 1.4.1.4 Disable CentOS repository again
 
 ```bash
