@@ -501,6 +501,10 @@ root$ pvcreate /dev/md6
 root$ xe sr-create type=lvm content-type=user device-config:device=/dev/md6 name-label="Local Storage 2"
 ```
 
+### 1.4 Setting up email notification
+
+In progress..
+
 ## A. Authors
 
 * Björn Hempel <bjoern@hempel.li> - _Initial work_ - [https://github.com/bjoern-hempel](https://github.com/bjoern-hempel)
