@@ -207,40 +207,30 @@ mount --bind /proc /mnt/proc
 chroot /mnt /bin/bash
 ```
 
-### 1.14 Backup the initrd img
+### 1.14 Backup and build new initrd img
 
 ```bash
 cp /boot/initrd-$(uname -r).img /boot/initrd-$(uname -r).img.bak
-```
-
-### 1.15 Build new initrd img
-
-```bash
 dracut --mdadmconf --fstab --add="mdraid" --add-drivers="raid1" --force /boot/initrd-$(uname -r).img $(uname -r) -M
 ```
 
-### 1.16 Set grub configs
+### 1.15 Set grub configs and install grub loader on /dev/sdb
 
 ```bash
 sed -i 's/quiet/rd.auto rd.auto=1 rhgb quiet/' /boot/grub/grub.cfg
 sed -i 's/LABEL=root-[a-zA-Z\-]*/\/dev\/md0/' /boot/grub/grub.cfg
 sed -i '/search/ i\  insmod gzio part_msdos diskfilter mdraid1x' /boot/grub/grub.cfg
 sed -i '/search/ c\  set root=(md/0)' /boot/grub/grub.cfg
-```
-
-### 1.17 Install grub loader on /dev/sdb
-
-```bash
 grub-install /dev/sdb
 ```
 
-### 1.18 Close chroot
+### 1.16 Close chroot
 
 ```bash
 exit
 ```
 
-### 1.19 Backup and copy the created initrd img and grub config
+### 1.17 Backup and copy the created initrd img and grub config
 
 ```bash
 cp /boot/initrd-$(uname -r).img /boot/initrd-$(uname -r).img.bak
@@ -248,13 +238,13 @@ cp /mnt/boot/initrd-$(uname -r).img /boot/
 cp /mnt/boot/grub/grub.cfg /boot/grub/grub.cfg
 ```
 
-### 1.20 Reboot the system (make sure to start with /dev/sdb!)
+### 1.18 Reboot the system (make sure to start with /dev/sdb!)
 
 ```bash
 reboot
 ```
 
-### 1.21 Check if /dev/md2 is missing
+### 1.19 Check if /dev/md2 is missing
 
 ```bash
 root$ lsblk 
@@ -289,20 +279,20 @@ cat /etc/mdadm.conf
 vi /etc/mdadm.conf # change uuid if has changed
 ```
 
-### 1.22 Delete partition informations on /dev/sda
+### 1.20 Delete partition informations on /dev/sda
 
 ```bash
 sgdisk --zap-all /dev/sda
 sgdisk --mbrtogpt --clear /dev/sda
 ```
 
-### 1.23 Copy the partition table from sdb to sda
+### 1.21 Copy the partition table from sdb to sda
 
 ```bash
 sgdisk -R /dev/sda /dev/sdb
 ```
 
-### 1.23 Complete raid
+### 1.22 Complete raid
 
 ```bash
 mdadm -a /dev/md0 /dev/sda1
@@ -312,7 +302,7 @@ mdadm -a /dev/md4 /dev/sda5
 mdadm -a /dev/md5 /dev/sda6
 ```
 
-### 1.24 Check syncing RAID
+### 1.23 Check syncing RAID
 
 ```bash
 root$ cat /proc/mdstat
@@ -337,13 +327,13 @@ md2 : active raid1 sdb3[0] sda3[2]
 unused devices: <none>
 ```
 
-### 1.25 Install grub on /dev/sda
+### 1.24 Install grub on /dev/sda
 
 ```bash
 grub-install /dev/sda
 ```
 
-### 1.26 Create LVM partitions on /dev/sda and /dev/sdb
+### 1.25 Create LVM partitions on /dev/sda and /dev/sdb
 
 ```bash
 gdisk /dev/sda
@@ -352,13 +342,13 @@ gdisk /dev/sdb
 n -> 4 -> ENTER -> ENTER -> FD00 -> w
 ```
 
-### 1.27 Create LVM RAID I
+### 1.26 Create LVM RAID I
 
 ```bash
 yes|mdadm --create /dev/md3 --level=1 --raid-devices=2 /dev/sda4 /dev/sdb4
 ```
 
-### 1.28 Maybe create LVM partitions on /dev/sdc and /dev/sdd
+### 1.27 Maybe create LVM partitions on /dev/sdc and /dev/sdd
 
 ```bash
 gdisk /dev/sdc
@@ -367,13 +357,13 @@ gdisk /dev/sdd
 n -> 4 -> ENTER -> ENTER -> FD00 -> w
 ```
  
-### 1.29 Maybe create LVM RAID II
+### 1.28 Maybe create LVM RAID II
 
 ```bash
 yes|mdadm --create /dev/md6 --level=1 --raid-devices=2 /dev/sdc1 /dev/sdd1
 ```
 
-### 1.30 Check partitions
+### 1.29 Check partitions
 
 ```bash
 root$ lsblk 
@@ -414,7 +404,7 @@ sr0      11:0    1  1024M  0 rom
 loop0     7:0    0    44M  1 loop  /var/xen/xc-install
 ```
 
-### 1.31 Check syncing RAID
+### 1.30 Check syncing RAID
 
 ```bash
 root$ cat /proc/mdstat
@@ -445,6 +435,18 @@ md2 : active raid1 sdb3[0] sda3[2]
       523712 blocks super 1.2 [2/2] [UU]
       
 unused devices: <none>
+```
+
+### 1.31 Make metadata readable 
+
+```bash
+vi /etc/lvm/lvm.conf
+```
+
+Set `metadata_read_only` to 0:
+
+```bash
+metadata_read_only = 0
 ```
 
 ### 1.32 Create LVM I
