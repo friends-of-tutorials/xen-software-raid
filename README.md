@@ -505,6 +505,14 @@ root$ xe sr-create type=lvm content-type=user device-config:device=/dev/md6 name
 
 In progress..
 
+### 1.5 Check RAID health status
+
+In progress..
+
+### 1.6 Change defective hard disk
+
+In progress..
+
 ## A. Authors
 
 * Björn Hempel <bjoern@hempel.li> - _Initial work_ - [https://github.com/bjoern-hempel](https://github.com/bjoern-hempel)
