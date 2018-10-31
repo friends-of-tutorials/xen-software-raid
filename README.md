@@ -577,7 +577,7 @@ enabled=0
 root$ echo "Add some text in here" | mail -s "The subject of this email" <email@address.tld>
 ```
 
-### 1.5 Check RAID health status
+### 1.5 Check RAID health status manually
 
 In progress..
 
