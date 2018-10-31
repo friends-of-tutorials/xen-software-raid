@@ -1,6 +1,6 @@
 # XenServer 7.6.2 Software RAID installation (mdadm)
 
-This instruction was written and tested for the XenServer version 7.6.2 and installs a software RAID mdadm afterwards.
+This instruction was written and tested for the XenServer version 7.6.2 and installs a software RAID mdadm afterwards. It is based on the following discussion: https://discussions.citrix.com/topic/378478-xenserver-7-raid1-mdadm-after-install-running-system/
 
 ## 1. Instruction
 
