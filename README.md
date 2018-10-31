@@ -537,7 +537,7 @@ enabled=1
 ##### 1.4.1.2 Install and configure postfix
 
 ```bash
-root$ yum install postfix
+root$ yum install postfix mailx
 ```
 
 Edit some postfix configs:
