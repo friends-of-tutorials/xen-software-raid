@@ -338,9 +338,9 @@ grub-install /dev/sda
 #### 1.2.25 Create LVM partitions on /dev/sda and /dev/sdb
 
 ```bash
-gdisk /dev/sda
+root$ gdisk /dev/sda
 n -> 4 -> ENTER -> ENTER -> FD00 -> w
-gdisk /dev/sdb
+root$ gdisk /dev/sdb
 n -> 4 -> ENTER -> ENTER -> FD00 -> w
 ```
 
@@ -440,9 +440,9 @@ root$ xe sr-create type=lvm content-type=user device-config:device=/dev/md3 name
 #### 1.3.1 Create LVM partitions on /dev/sdc and /dev/sdd
 
 ```bash
-gdisk /dev/sdc
+root$ gdisk /dev/sdc
 n -> 4 -> ENTER -> ENTER -> FD00 -> w
-gdisk /dev/sdd
+root$ gdisk /dev/sdd
 n -> 4 -> ENTER -> ENTER -> FD00 -> w
 ```
  
