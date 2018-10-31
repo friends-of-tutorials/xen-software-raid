@@ -6,7 +6,7 @@ This instruction was written and tested for the XenServer version 7.6.2 and inst
 
 ### 1.1 Installation XenServer
 
-First install the XenServer as usual without (!) the LVM repositories. Make sure that there are no mdadm-superblocks of older installations on the hard disk, because it is not possible to install XenServer on such disks. Use the following commands to clean up the partitions if necessary:
+First of all install the XenServer as usual without (!) the LVM repositories. Make sure that there are no mdadm-superblocks of older installations on the hard disk, because it is not possible to install XenServer on such disks. Use the following commands to clean up the partitions if necessary:
 
 ```bash
 umount /dev/md<number of md>
