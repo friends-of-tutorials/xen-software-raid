@@ -437,30 +437,34 @@ md2 : active raid1 sdb3[0] sda3[2]
 unused devices: <none>
 ```
 
-### 1.31 Make metadata readable 
+### 1.31 Make metadata readable and the lvmetad.socket is available
 
 ```bash
 vi /etc/lvm/lvm.conf
 ```
 
-Set `metadata_read_only` to 0:
+Set `metadata_read_only` to 0 and `use_lvmetad` also to 0:
 
 ```bash
 metadata_read_only = 0
+
+use_lvmetad = 0
 ```
 
 ### 1.32 Create LVM I
 
 ```bash
-pvcreate /dev/md3
-xe sr-create type=lvm content-type=user device-config:device=/dev/md3 name-label="Local Storage 1"
+root$ pvcreate /dev/md3
+  Physical volume "/dev/md6" successfully created
+root$ xe sr-create type=lvm content-type=user device-config:device=/dev/md3 name-label="Local Storage 1"
 ```
 
 ### 1.33 Maybe create LVM II
 
 ```bash
-pvcreate /dev/md6
-xe sr-create type=lvm content-type=user device-config:device=/dev/md6 name-label="Local Storage 2"
+root$ pvcreate /dev/md6
+  Physical volume "/dev/md6" successfully created
+root$ xe sr-create type=lvm content-type=user device-config:device=/dev/md6 name-label="Local Storage 2"
 ```
 
 ## A. Authors
