@@ -342,6 +342,8 @@ md2 : active raid1 sdb3[0] sda3[2]
 unused devices: <none>
 ```
 
+Wait until the synchronization of all RAIDs is complete (md0 to md5). This may take a few hours. Continue afterwards. 
+
 #### 1.2.24 Install grub on /dev/sda
 
 ```bash
@@ -426,7 +428,7 @@ md2 : active raid1 sdb3[0] sda3[2]
 unused devices: <none>
 ```
 
-Wait until the synchronization is complete. This may take a few hours. Continue only then. 
+Wait until the synchronization is complete. This may take a few hours. Continue afterwards. 
 
 #### 1.2.29 Make metadata readable and the lvmetad.socket available
 
@@ -498,7 +500,7 @@ md2 : active raid1 sdb3[0] sda3[2]
 unused devices: <none>
 ```
 
-Wait until the synchronization is complete. This may take a few hours. Continue only then. 
+Wait until the synchronization is complete. This may take a few hours. Continue afterwards. 
 
 #### 1.3.4 Check partitions
 
