@@ -426,6 +426,8 @@ md2 : active raid1 sdb3[0] sda3[2]
 unused devices: <none>
 ```
 
+Wait until the synchronization is complete. This may take a few hours. Continue only then. 
+
 #### 1.2.29 Make metadata readable and the lvmetad.socket available
 
 ```bash
@@ -450,7 +452,7 @@ root$ xe sr-create type=lvm content-type=user device-config:device=/dev/md3 name
 
 ### 1.3 Create another LVM Repository if wanted and add new disks
 
-#### 1.3.1 Create LVM partitions on /dev/sdc and /dev/sdd
+#### 1.3.1 Create second LVM partitions on /dev/sdc and /dev/sdd
 
 ```bash
 root$ gdisk /dev/sdc
@@ -459,13 +461,46 @@ root$ gdisk /dev/sdd
 n -> 4 -> ENTER -> ENTER -> FD00 -> w
 ```
  
-#### 1.3.2 Maybe create LVM RAID
+#### 1.3.2 Create second LVM RAID
 
 ```bash
 root$ yes|mdadm --create /dev/md6 --level=1 --raid-devices=2 /dev/sdc1 /dev/sdd1
 ```
 
-#### 1.3.3 Check partitions
+#### 1.3.3 Check sync status
+
+```bash
+Personalities : [raid1] 
+md6 : active raid1 sdb4[1] sda4[0]
+      933114560 blocks super 1.2 [2/2] [UU]
+      [=>...................]  resync =  7.2% (67247616/933114560) finish=136.2min speed=105941K/sec
+      bitmap: 7/7 pages [28KB], 65536KB chunk
+
+md3 : active raid1 sdb4[1] sda4[0]
+      933114560 blocks super 1.2 [2/2] [UU]
+      bitmap: 0/7 pages [0KB], 65536KB chunk
+
+md1 : active raid1 sda2[2] sdb2[0]
+      18857984 blocks super 1.2 [2/2] [UU]
+      
+md4 : active raid1 sdb5[0] sda5[2]
+      4190208 blocks super 1.2 [2/2] [UU]
+      
+md5 : active raid1 sda6[2] sdb6[0]
+      1047552 blocks super 1.2 [2/2] [UU]
+      
+md0 : active raid1 sdb1[0] sda1[2]
+      18857984 blocks super 1.2 [2/2] [UU]
+      
+md2 : active raid1 sdb3[0] sda3[2]
+      523712 blocks super 1.2 [2/2] [UU]
+      
+unused devices: <none>
+```
+
+Wait until the synchronization is complete. This may take a few hours. Continue only then. 
+
+#### 1.3.4 Check partitions
 
 ```bash
 root$ lsblk 
@@ -506,7 +541,7 @@ sr0      11:0    1  1024M  0 rom
 loop0     7:0    0    44M  1 loop  /var/xen/xc-install
 ```
 
-#### 1.3.4 Create LVM
+#### 1.3.5 Create second LVM
 
 ```bash
 root$ pvcreate /dev/md6
