@@ -178,7 +178,9 @@ ARRAY /dev/md4 metadata=1.2 name=xenserver-7:4 UUID=4a064db1:0c8e8f42:76810417:5
 ARRAY /dev/md5 metadata=1.2 name=xenserver-7:5 UUID=30dfc30a:1c8031bf:93d8c760:24186100
 ```
 
-##### 1.2.10.2 Check the fstab config
+#### 1.2.11 Set new fstab with md devices
+
+##### 1.2.11.1 Check the fstab config
 
 ```bash
 root$ cat /mnt/etc/fstab
@@ -188,7 +190,7 @@ LABEL=logs-ocmtfp    /var/log         ext3     defaults   0  2
 /opt/xensource/packages/iso/XenCenter.iso   /var/xen/xc-install   iso9660   loop,ro   0  0
 ```
 
-#### 1.2.11 Set new fstab with md devices
+##### 1.2.11.2 Set new fstab
 
 ```bash
 root$ sed -i 's/LABEL=root-[a-zA-Z\-]*/\/dev\/md0/' /mnt/etc/fstab
@@ -197,7 +199,7 @@ root$ sed -i 's/LABEL=logs-[a-zA-Z\-]*/\/dev\/md4/' /mnt/etc/fstab
 root$ cp /mnt/etc/fstab /etc
 ```
 
-##### 1.2.11.1 Check the fstab config after adjustment
+##### 1.2.11.3 Check the fstab config after adjustment
 
 ```bash
 root$ cat /mnt/etc/fstab
