@@ -180,7 +180,7 @@ ARRAY /dev/md5 metadata=1.2 name=xenserver-7:5 UUID=30dfc30a:1c8031bf:93d8c760:2
 
 #### 1.2.11 Set new fstab with md devices
 
-##### 1.2.11.1 Check the fstab config
+##### 1.2.11.1 Check the fstab config before adjustment
 
 ```bash
 root$ cat /mnt/etc/fstab
