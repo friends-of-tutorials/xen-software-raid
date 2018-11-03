@@ -18,6 +18,8 @@ root$ mdadm --zero-superblock /dev/sda<number of partition>
 
 #### 1.2.1 Check environment after XenServer installation
 
+We do have 5 partitions (sda1, sda2, sda3, sda5 and sda6):
+
 ```bash
 root$ lsblk 
 NAME   MAJ:MIN RM   SIZE RO TYPE MOUNTPOINT
